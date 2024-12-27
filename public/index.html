@@ -21,7 +21,7 @@
 
     // Load the TensorFlow.js model
     async function loadModel() {
-      model = await tf.loadGraphModel('/model/anti-spoofing.json');
+      model = await tf.loadGraphModel('anti-spoofing/model/anti-spoofing.json');
       console.log('Model loaded');
     }
 
@@ -35,6 +35,10 @@
 
     // Capture a frame from the video and run prediction
     async function captureFrame() {
+      if (!model) {
+        console.error('Model not loaded');
+        return;
+      }
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
       const imgTensor = tf.browser.fromPixels(imageData)
