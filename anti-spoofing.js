@@ -5,7 +5,7 @@ const log = require('@vladmandic/pilogger');
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/model', express.static(path.join(__dirname, 'model')));
+app.use('/anti-spoofing/model', express.static(path.join(__dirname, 'model')));
 
 app.listen(3000, () => {
   log.info('Server is running on http://localhost:3000');
