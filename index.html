@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Spoofing</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body>
+  <h1>Anti-Spoofing Prediction</h1>
+  <video id="video" width="640" height="480" autoplay></video>
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+  <div id="result"></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const resultDiv = document.getElementById('result');
+    let model;
+
+    // Load the TensorFlow.js model
+    async function loadModel() {
+      model = await tf.loadGraphModel('/model/anti-spoofing.json');
+      console.log('Model loaded');
+    }
+
+    // Get access to the webcam
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+        video.srcObject = stream;
+        video.play();
+      });
+    }
+
+    // Capture a frame from the video and run prediction
+    async function captureFrame() {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const imgTensor = tf.browser.fromPixels(imageData)
+        .resizeBilinear([128, 128])
+        .div(255)
+        .expandDims(0);
+
+      const result = model.predict(imgTensor);
+      const real = result.dataSync()[0];
+      resultDiv.innerText = `Real? ${real}`;
+    }
+
+    // Capture a frame every second
+    setInterval(captureFrame, 1000);
+
+    // Load the model
+    loadModel();
+  </script>
+</body>
+</html>
